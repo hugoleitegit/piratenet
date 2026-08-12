@@ -1,0 +1,58 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "Piratenet/1.0.0": {
+        "dependencies": {
+          "Radzen.Blazor": "11.2.3"
+        },
+        "runtime": {
+          "Piratenet.dll": {}
+        }
+      },
+      "Radzen.Blazor/11.2.3": {
+        "runtime": {
+          "lib/net10.0/Radzen.Blazor.dll": {
+            "assemblyVersion": "11.2.3.0",
+            "fileVersion": "11.2.3.0"
+          }
+        },
+        "resources": {
+          "lib/net10.0/de/Radzen.Blazor.resources.dll": {
+            "locale": "de"
+          },
+          "lib/net10.0/es/Radzen.Blazor.resources.dll": {
+            "locale": "es"
+          },
+          "lib/net10.0/fr/Radzen.Blazor.resources.dll": {
+            "locale": "fr"
+          },
+          "lib/net10.0/it/Radzen.Blazor.resources.dll": {
+            "locale": "it"
+          },
+          "lib/net10.0/ja/Radzen.Blazor.resources.dll": {
+            "locale": "ja"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Piratenet/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Radzen.Blazor/11.2.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-UJi+wlvamOx7bR20zv60jyJ5G2olBo9PwpsyJWKtPggr+YMNOaHP6qKfXKtDK6ky9vCtx3NmeZ2RFSHfX0Waxg==",
+      "path": "radzen.blazor/11.2.3",
+      "hashPath": "radzen.blazor.11.2.3.nupkg.sha512"
+    }
+  }
+}

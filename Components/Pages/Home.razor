@@ -1,0 +1,208 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using System.Text.Json
+@inject IJSRuntime JS
+
+<PageTitle>Piratenet - Planos Dorados Pirate Galaxy</PageTitle>
+
+<div class="blueprint-container">
+    <div class="blueprint-header-row">
+        <div class="blueprint-mark">☠</div>
+        <h2 class="blueprint-title">Piratenet: Planos Dorados - Completo</h2>
+    </div>
+
+    <div class="blueprint-summary">
+        <div class="blueprint-summary-item">Quedan Vega: <strong>@CountMissing(0)</strong></div>
+        <div class="blueprint-summary-item">Quedan Antares: <strong>@CountMissing(1)</strong></div>
+        <div class="blueprint-summary-item">Quedan Gemini: <strong>@CountMissing(2)</strong></div>
+        <div class="blueprint-summary-item">Quedan Mizar: <strong>@CountMissing(3)</strong></div>
+        <div class="blueprint-summary-item">Quedan Sol: <strong>@CountMissing(4)</strong></div>
+        <div class="blueprint-summary-item">Quedan Draconis: <strong>@CountMissing(5)</strong></div>
+    </div>
+
+    <table class="blueprint-table">
+        <thead>
+            <tr>
+                @foreach (var system in Systems)
+                {
+                    <th colspan="2">@system</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (var rowIndex = 0; rowIndex < BlueprintRows.Length; rowIndex++)
+            {
+                var row = BlueprintRows[rowIndex];
+                <tr>
+                    @for (var systemIndex = 0; systemIndex < Systems.Length; systemIndex++)
+                    {
+                        var status = row.Availability[systemIndex];
+                        if (status.HasValue)
+                        {
+                            var clickedRowIndex = rowIndex;
+                            var clickedSystemIndex = systemIndex;
+
+                            <td class="blueprint-item" style="background-color:@row.Color">@row.Name</td>
+                            <td class="blueprint-status @(status.Value ? "available" : "missing")"
+                                @onclick="() => ToggleAvailability(clickedRowIndex, clickedSystemIndex)"
+                                title="Haz clic para alternar">
+                                @((status.Value) ? "Y" : "N")
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="blueprint-placeholder"></td>
+                            <td class="blueprint-placeholder"></td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private readonly string[] Systems = new[] { "Vega", "Antares", "Gemini", "Mizar", "Sol", "Draconis" };
+
+    private BlueprintRow[] BlueprintRows =
+    {
+        new("Cañón", "#ffffff", true, true, true, true, true, true),
+        new("Recolector", "#ffffff", true, true, true, true, true, true),
+        new("Reparador", "#ffffff", true, true, true, true, true, true),
+        new("Impulsor", "#ffffff", true, true, true, true, true, true),
+
+        new("Misil", "#d98880", true, true, true, true, true, true),
+        new("Mira", "#d98880", true, true, true, true, true, true),
+        new("Perforador", "#d98880", null, true, true, true, true, true),
+        new("Rayo Térmico", "#d98880", null, null, true, true, true, true),
+
+        new("Escudo", "#f9e79f", true, true, true, true, true, true),
+        new("Picador", "#f9e79f", true, true, true, true, true, true),
+        new("Señal", "#f9e79f", null, true, true, true, true, true),
+        new("Bomba", "#f9e79f", null, null, true, true, true, true),
+
+        new("Acelerador", "#85c1e9", true, true, true, true, true, true),
+        new("Desacelerador", "#85c1e9", true, true, true, true, true, true),
+        new("Señuelo", "#85c1e9", null, true, true, true, true, true),
+        new("Paralizador", "#85c1e9", null, null, true, true, true, true),
+
+        new("Protector", "#a9dfbf", true, true, true, true, true, true),
+        new("Telerreparador", "#a9dfbf", true, true, true, true, true, true),
+        new("C.Reparador", "#a9dfbf", null, true, true, true, true, true),
+        new("Resucitador", "#a9dfbf", null, null, true, true, true, true),
+
+        new("Largo", "#eb984e", null, null, null, true, true, true),
+        new("Droide", "#eb984e", null, null, null, true, true, true),
+        new("Orbital", "#eb984e", null, null, null, true, true, true),
+        new("Carga", "#eb984e", null, null, null, true, true, true),
+
+        new("T.Ataque", "#bb8fce", null, null, null, true, true, false),
+        new("T.Repa", "#bb8fce", null, null, null, true, true, false),
+        new("Mina", "#bb8fce", null, null, null, true, true, false),
+        new("Lapa", "#bb8fce", null, null, null, true, true, false),
+
+        new("Haz eléctrico", "#d5d8dc", null, null, null, true, true, true),
+    };
+
+    private int CountMissing(int systemIndex)
+    {
+        var count = 0;
+        foreach (var row in BlueprintRows)
+        {
+            if (systemIndex < row.Availability.Length && row.Availability[systemIndex] == false)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private const string StorageKey = "piratenet.blueprints.v1";
+
+    private int ClickCount { get; set; }
+    private string LastClicked { get; set; } = "ninguno";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadStateAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadStateAsync()
+    {
+        try
+        {
+            var json = await JS.InvokeAsync<string>("localStorage.getItem", StorageKey);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return;
+            }
+
+            var loaded = JsonSerializer.Deserialize<bool?[][]>(json);
+            if (loaded is null || loaded.Length != BlueprintRows.Length)
+            {
+                return;
+            }
+
+            for (var rowIndex = 0; rowIndex < BlueprintRows.Length; rowIndex++)
+            {
+                if (loaded[rowIndex] is null || loaded[rowIndex].Length != BlueprintRows[rowIndex].Availability.Length)
+                {
+                    continue;
+                }
+
+                for (var systemIndex = 0; systemIndex < BlueprintRows[rowIndex].Availability.Length; systemIndex++)
+                {
+                    BlueprintRows[rowIndex].Availability[systemIndex] = loaded[rowIndex][systemIndex];
+                }
+            }
+        }
+        catch
+        {
+            // Ignored: LocalStorage may not be available in some contexts.
+        }
+    }
+
+    private async Task SaveStateAsync()
+    {
+        try
+        {
+            var payload = BlueprintRows
+                .Select(row => row.Availability.ToArray())
+                .ToArray();
+
+            var json = JsonSerializer.Serialize(payload);
+            await JS.InvokeVoidAsync("localStorage.setItem", StorageKey, json);
+        }
+        catch
+        {
+            // Ignored: LocalStorage may not be available in some contexts.
+        }
+    }
+
+    private async Task TestClick()
+    {
+        ClickCount++;
+        LastClicked = "botón global";
+        await SaveStateAsync();
+    }
+
+    private async Task ToggleAvailability(int rowIndex, int systemIndex)
+    {
+        ClickCount++;
+        LastClicked = $"fila {rowIndex}, sistema {Systems[systemIndex]}";
+
+        var current = BlueprintRows[rowIndex].Availability[systemIndex];
+        if (current.HasValue)
+        {
+            BlueprintRows[rowIndex].Availability[systemIndex] = !current.Value;
+            await SaveStateAsync();
+        }
+    }
+
+    private record BlueprintRow(string Name, string Color, params bool?[] Availability);
+}
+

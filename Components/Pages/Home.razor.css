@@ -1,0 +1,124 @@
+.blueprint-container {
+    padding: 18px 18px 22px;
+    background: #121212;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    overflow-x: auto;
+    --header-bg: #d59a22;
+    --header-text: #111;
+    --available-bg: #bfe7cf;
+    --missing-bg: #e9b7b4;
+    --missing-text: #7f1d1d;
+    --placeholder-bg: #1f1f1f;
+    --item-border: rgba(255,255,255,0.18);
+}
+
+.blueprint-header-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.blueprint-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(153, 82, 255, 0.2);
+    border: 1px solid rgba(255,255,255,0.15);
+    font-size: 22px;
+    color: #ffd54a;
+}
+
+.blueprint-title {
+    margin: 0;
+    color: #ffcc00;
+    font-size: clamp(2rem, 3vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.blueprint-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+    color: #f3f3f3;
+    font-size: 0.95rem;
+}
+
+.blueprint-summary-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 8px 10px;
+    border-radius: 6px;
+}
+
+.blueprint-table {
+    width: 100%;
+    min-width: 1200px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    text-align: center;
+    font-size: 12px;
+    white-space: nowrap;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+.blueprint-table th {
+    padding: 10px 8px;
+    background: var(--header-bg);
+    color: var(--header-text);
+    font-weight: 800;
+    border: 1px solid var(--item-border);
+}
+
+.blueprint-item,
+.blueprint-status,
+.blueprint-placeholder {
+    min-height: 36px;
+    height: 36px;
+    border: 1px solid var(--item-border);
+    box-sizing: border-box;
+}
+
+.blueprint-item {
+    background: rgba(255,255,255,0.9);
+    color: #111;
+    font-weight: 700;
+    text-align: left;
+    padding: 0 10px;
+}
+
+.blueprint-status {
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.blueprint-status:hover {
+    filter: brightness(0.96);
+}
+
+.blueprint-status:active {
+    transform: scale(0.99);
+}
+
+.blueprint-status.available {
+    background: var(--available-bg);
+    color: #111;
+}
+
+.blueprint-status.missing {
+    background: var(--missing-bg);
+    color: var(--missing-text);
+}
+
+.blueprint-placeholder {
+    background: var(--placeholder-bg);
+    min-width: 80px;
+}
