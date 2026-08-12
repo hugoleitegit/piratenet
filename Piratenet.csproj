@@ -12,4 +12,15 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.11" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- Replace base href in wwwroot/index.html when publishing. -->
+  <Target Name="SetBaseHrefForPublish" BeforeTargets="PrepareForPublish">
+    <PropertyGroup>
+      <!-- Default to root for development; override with -p:BaseHref=/your/path/ when publishing -->
+      <BaseHref Condition="'$(BaseHref)'==''">/</BaseHref>
+      <IndexHtml>$(ProjectDir)wwwroot\index.html</IndexHtml>
+    </PropertyGroup>
+    <Message Importance="High" Text="Setting base href to '$(BaseHref)' in $(IndexHtml)" />
+      <Exec Command="powershell -NoProfile -Command &quot;(Get-Content '$(IndexHtml)') -replace '&lt;base href=&quot;.*?&quot;\s*/&gt;', '&lt;base href=&quot;$(BaseHref)&quot; /&gt;' | Set-Content '$(IndexHtml)'&quot;" />
+  </Target>
+
 </Project>
