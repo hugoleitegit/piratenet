@@ -49,3 +49,56 @@ Problemas comunes
 Contacto
 - Si quieres, puedo añadir más scripts (ej. para Windows + Linux), o mejorar el
   workflow (preview deploys, tags, etc.).
+
+**Desarrollo local, `base href` y publicación**
+
+- Problema: GitHub Pages sirve el sitio desde la ruta del repositorio (por ejemplo
+  `/piratenet/`) mientras que en desarrollo Kestrel sirve la app en la raíz `/`.
+  Esto provocaba 404 en recursos como `_framework/*` cuando `index.html` tenía
+  `<base href="/piratenet/" />` y se abría `https://localhost:####/piratenet/`.
+
+- Solución aplicada: se añadió un Target MSBuild en `Piratenet.csproj` llamado
+  `SetBaseHrefForPublish`. Al publicar puedes pasar la propiedad `BaseHref` y el
+  Target reemplazará automáticamente el `<base href="..." />` en la copia de
+  `wwwroot/index.html` dentro del artefacto `publish`.
+
+  - Desarrollo (no hace falta cambiar `index.html`): el repositorio mantiene
+    `wwwroot/index.html` con `<base href="/" />` para que `dotnet run` funcione
+    correctamente.
+  - Publicar para GitHub Pages (ejemplo):
+
+```powershell
+cd C:\Users\hache\Desktop\proyects\Piratenet
+dotnet publish -c Release -o publish -p:BaseHref=/piratenet/
+```
+
+  Los archivos resultantes en `publish\wwwroot` contendrán `<base href="/piratenet/" />`.
+
+- Ejecutar en desarrollo (abrir la URL raíz que muestre la consola):
+
+```powershell
+cd C:\Users\hache\Desktop\proyects\Piratenet
+dotnet restore
+dotnet run --project .\Piratenet.csproj
+# abrir https://localhost:5183/ (o la URL que indique la consola)
+```
+
+- Servir la carpeta publicada localmente (prueba final antes de push a Pages):
+
+```powershell
+cd C:\Users\hache\Desktop\proyects\Piratenet\publish\wwwroot
+python -m http.server 8080
+# abrir http://localhost:8080/piratenet/
+```
+
+- Notas:
+  - No es necesario editar manualmente `wwwroot/index.html` para publicar —
+    usa `-p:BaseHref=...` al publicar y el proyecto lo sustituirá automáticamente.
+  - Si prefieres otro comportamiento (por ejemplo dejar `index.html` con
+    `<base href="./" />`), dímelo y lo aplicamos globalmente.
+
+**UI**
+
+- Se renombró el enlace `Home` a `Planos Dorados` y se eliminaron los enlaces
+  `Counter` y `Weather` en `Layout/NavMenu.razor`.
+
