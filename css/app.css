@@ -1,5 +1,10 @@
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(141, 79, 24, 0.32), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(96, 109, 129, 0.18), transparent 28%),
+        #171717;
+    color: #e6e6e6;
 }
 
 h1:focus {
@@ -22,6 +27,21 @@ a, .btn-link {
 
 .content {
     padding-top: 1.1rem;
+}
+
+.btn {
+    border-radius: 2px;
+}
+
+.btn-primary {
+    background-color: #50667a;
+    border-color: #243241;
+    color: #f5f7fa;
+}
+
+.btn-primary:hover {
+    background-color: #5f7387;
+    border-color: #2f3d4a;
 }
 
 .valid.modified:not([type=checkbox]) {
@@ -112,4 +132,20 @@ code {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
+}
+
+.blueprint-table-compact {
+    font-size: 0.88rem;
+}
+
+.blueprint-table-compact th,
+.blueprint-table-compact td {
+    padding: 0.18rem 0.35rem;
+    line-height: 1.05;
+}
+
+.blueprint-table-compact .blueprint-item,
+.blueprint-table-compact .blueprint-status {
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
 }
