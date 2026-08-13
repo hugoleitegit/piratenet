@@ -17,11 +17,18 @@ Asistir en desarrollo y despliegue de `Piratenet` sin romper sincronizacion con 
 ## 2) Flujo de deploy permitido
 - Comando de publish:
 	- `dotnet publish Piratenet.csproj -c Release -o publish -p:BaseHref=/piratenet/`
+- Error recurrente critico a evitar:
+	- Nunca publicar con `base href="/"` para GitHub Pages de este repo.
+	- Para este proyecto, el unico valor valido en produccion es `base href="/piratenet/"`.
 - Publicar solo el contenido de `publish/wwwroot` en la raiz de `gh-pages`.
 - Asegurar archivo `.nojekyll` en `gh-pages`.
 - `index.html` y `_framework/*` deben provenir del mismo `dotnet publish`.
 - No hacer parches manuales de `integrity` si no es imprescindible; preferir republicar limpio.
 - Despues de cada despliegue en produccion, comprobar el estado del workflow de GitHub Actions y reportar resultado (exito/fallo/en progreso) con enlace o identificador de ejecucion.
+- Comprobaciones obligatorias de base href:
+	- Antes de publicar: confirmar que el comando de publish incluye `-p:BaseHref=/piratenet/`.
+	- Despues de publicar: comprobar en `publish/wwwroot/index.html` que aparece `base href="/piratenet/"`.
+	- Despues del deploy: comprobar en `origin/gh-pages:index.html` que aparece `base href="/piratenet/"`.
 
 ## 3) Reglas de seguridad Git
 - Pedir confirmacion antes de acciones destructivas.
@@ -37,6 +44,7 @@ Una tarea queda cerrada solo si:
 - `git status` queda limpio (o cambios claramente justificados).
 - Si hay deploy: push a `gh-pages` completado.
 - Si hay deploy en produccion: verificacion explicita del estado del workflow de deploy en GitHub Actions.
+- Si hay deploy en produccion: verificacion explicita de `base href="/piratenet/"` en el `index.html` ya publicado.
 - Si hay deploy: validacion minima de URL publica y recursos principales sin error.
 - Resumen final breve con: que se hizo, estado, y pendiente si aplica.
 
@@ -48,6 +56,7 @@ Una tarea queda cerrada solo si:
 	- No encadenar cambios grandes sin confirmar causa raiz.
 - Si falla Pages (404/SRI):
 	- Verificar `base href` en `publish/wwwroot/index.html`.
+	- Si `base href` es `/`, tratarlo como causa raiz probable y corregir publish con `-p:BaseHref=/piratenet/`.
 	- Verificar que `index.html` y `_framework` sean del mismo publish.
 	- Rehacer deploy limpio de `publish/wwwroot` a `gh-pages`.
 
