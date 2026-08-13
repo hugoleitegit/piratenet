@@ -334,10 +334,18 @@
     private static bool IsArcanoMatrixCellUnavailable(string groupTitle, int rowIndex, int variantIndex)
     {
         // En Arcano Vega, estas filas no existen en PTT/NOR/AGIL y deben mostrarse vacias.
-        return groupTitle == "Vega"
+        var isVegaUnavailable = groupTitle == "Vega"
             && (rowIndex == 6 || rowIndex == 7 || rowIndex == 10 || rowIndex == 11)
             && variantIndex >= 0
             && variantIndex < 3;
+
+        // En Arcano Antares, Rayo Térmico y Bomba no existen en PTT/NOR/AGIL.
+        var isAntaresUnavailable = groupTitle == "Antares"
+            && (rowIndex == 7 || rowIndex == 11)
+            && variantIndex >= 0
+            && variantIndex < 3;
+
+        return isVegaUnavailable || isAntaresUnavailable;
     }
 
     private static bool IsArcanoMatrixCellForcedAvailable(string groupTitle, int rowIndex, int variantIndex)
