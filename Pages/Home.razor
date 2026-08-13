@@ -10,16 +10,20 @@
         <h2 class="blueprint-title">Piratenet: Planos Dorados - Completo</h2>
     </div>
 
-    <div class="blueprint-summary">
-        <div class="blueprint-summary-item">Quedan Vega: <strong>@CountMissing(0)</strong></div>
-        <div class="blueprint-summary-item">Quedan Antares: <strong>@CountMissing(1)</strong></div>
-        <div class="blueprint-summary-item">Quedan Gemini: <strong>@CountMissing(2)</strong></div>
-        <div class="blueprint-summary-item">Quedan Mizar: <strong>@CountMissing(3)</strong></div>
-        <div class="blueprint-summary-item">Quedan Sol: <strong>@CountMissing(4)</strong></div>
-        <div class="blueprint-summary-item">Quedan Draconis: <strong>@CountMissing(5)</strong></div>
-    </div>
+    <table class="blueprint-summary blueprint-summary-table">
+        <tbody>
+            <tr>
+                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Vega: <strong>@CountMissing(0)</strong></td>
+                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Antares: <strong>@CountMissing(1)</strong></td>
+                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Gemini: <strong>@CountMissing(2)</strong></td>
+                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Mizar: <strong>@CountMissing(3)</strong></td>
+                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Sol: <strong>@CountMissing(4)</strong></td>
+                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Draconis: <strong>@CountMissing(5)</strong></td>
+            </tr>
+        </tbody>
+    </table>
 
-    <table class="blueprint-table">
+    <table class="blueprint-table blueprint-table-compact">
         <thead>
             <tr>
                 @foreach (var system in Systems)
@@ -52,6 +56,82 @@
                         {
                             <td class="blueprint-placeholder"></td>
                             <td class="blueprint-placeholder"></td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="blueprint-container" style="margin-top: 2rem;">
+    <div class="blueprint-header-row">
+        <div class="blueprint-mark">✦</div>
+        <h2 class="blueprint-title">Tecnologia Arcana de Sistemas</h2>
+    </div>
+
+    <table class="blueprint-summary blueprint-summary-table">
+        <tbody>
+            <tr>
+                @foreach (var group in ArcanoMatrixGroups)
+                {
+                    <td class="blueprint-summary-item blueprint-summary-cell">Quedan @group.Title: <strong>@CountArcanoMatrixMissing(group)</strong></td>
+                }
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="blueprint-table blueprint-table-compact">
+        <thead>
+            <tr>
+                <th class="arcano-matrix-stub-header" rowspan="2"></th>
+                @for (var groupIndex = 0; groupIndex < ArcanoMatrixGroups.Length; groupIndex++)
+                {
+                    <th colspan="3">Arcano @ArcanoMatrixGroups[groupIndex].Title</th>
+                }
+            </tr>
+            <tr>
+                @foreach (var group in ArcanoMatrixGroups)
+                {
+                    @foreach (var variant in ArcanoMatrixVariants)
+                    {
+                        <th>@variant</th>
+                    }
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (var rowIndex = 0; rowIndex < ArcanoMatrixRows.Length; rowIndex++)
+            {
+                var row = ArcanoMatrixRows[rowIndex];
+                <tr>
+                    <td class="blueprint-item" style="background-color:@row.Color">@row.Name</td>
+                    @for (var groupIndex = 0; groupIndex < ArcanoMatrixGroups.Length; groupIndex++)
+                    {
+                        var group = ArcanoMatrixGroups[groupIndex];
+                        var groupRow = group.Rows[rowIndex];
+
+                        @for (var variantIndex = 0; variantIndex < ArcanoMatrixVariants.Length; variantIndex++)
+                        {
+                            var cell = groupRow.Availability[variantIndex];
+
+                            if (cell.HasValue)
+                            {
+                                var clickedGroupIndex = groupIndex;
+                                var clickedRowIndex = rowIndex;
+                                var clickedVariantIndex = variantIndex;
+                                var isAvailable = cell.Value;
+
+                                <td class="blueprint-status @(isAvailable ? "available" : "missing")"
+                                    @onclick="() => ToggleArcanoMatrixAvailability(clickedGroupIndex, clickedRowIndex, clickedVariantIndex)"
+                                    title="Haz clic para alternar">
+                                    @(isAvailable ? "Y" : "N")
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="blueprint-placeholder arcano-matrix-empty-cell"></td>
+                            }
                         }
                     }
                 </tr>
@@ -103,6 +183,52 @@
         new("Haz eléctrico", "#d5d8dc", null, null, null, true, true, true),
     };
 
+    private static readonly string[] ArcanoMatrixVariants = new[] { "PTT", "NOR", "AGIL" };
+
+    private const int ArcanoMatrixRowCount = 28;
+
+    private readonly ArcanoMatrixGroup[] ArcanoMatrixGroups =
+    {
+        CreateArcanoMatrixGroup("Draconis", 28),
+        CreateArcanoMatrixGroup("Sol", 24),
+        CreateArcanoMatrixGroup("Mizar", 20),
+        CreateArcanoMatrixGroup("Gemini", 16),
+        CreateArcanoMatrixGroup("Antares", 12),
+        CreateArcanoMatrixGroup("Vega", 12),
+    };
+
+    private static readonly ArcanoMatrixRow[] ArcanoMatrixRows =
+    {
+        new("Cañón", "#fff2cc"),
+        new("Recolector", "#fff2cc"),
+        new("Reparador", "#fff2cc"),
+        new("Impulsor", "#fff2cc"),
+        new("Misil", "#ff6666"),
+        new("Mira", "#ff6666"),
+        new("Perforador", "#ff6666"),
+        new("Rayo Térmico", "#ff6666"),
+        new("Escudo", "#ffd966"),
+        new("Picador", "#ffd966"),
+        new("Señal", "#ffd966"),
+        new("Bomba", "#ffd966"),
+        new("Acelerador", "#9fc5e8"),
+        new("Desacelerador", "#9fc5e8"),
+        new("Señuelo", "#9fc5e8"),
+        new("Paralizador", "#9fc5e8"),
+        new("Protector", "#b6d7a8"),
+        new("Telerreparador", "#b6d7a8"),
+        new("C.Reparador", "#b6d7a8"),
+        new("Resucitador", "#b6d7a8"),
+        new("Largo", "#f6b26b"),
+        new("Droide", "#f6b26b"),
+        new("Orbital", "#f6b26b"),
+        new("Carga", "#f6b26b"),
+        new("T.Ataque", "#f3a1ff"),
+        new("T.Repa", "#f3a1ff"),
+        new("Mina", "#f3a1ff"),
+        new("Lapa", "#f3a1ff"),
+    };
+
     private int CountMissing(int systemIndex)
     {
         var count = 0;
@@ -126,6 +252,7 @@
         if (firstRender)
         {
             await LoadStateAsync();
+            await LoadArcanoMatrixStateAsync();
             StateHasChanged();
         }
     }
@@ -202,5 +329,240 @@
         }
     }
 
+    private const string ArcanoMatrixStorageKey = "piratenet.arcano.matrix.v2";
+
+    private static bool IsArcanoMatrixCellUnavailable(string groupTitle, int rowIndex, int variantIndex)
+    {
+        // En Arcano Vega, estas filas no existen en PTT/NOR/AGIL y deben mostrarse vacias.
+        return groupTitle == "Vega"
+            && (rowIndex == 6 || rowIndex == 7 || rowIndex == 10 || rowIndex == 11)
+            && variantIndex >= 0
+            && variantIndex < 3;
+    }
+
+    private static bool IsArcanoMatrixCellForcedAvailable(string groupTitle, int rowIndex, int variantIndex)
+    {
+        var isValidVariant = variantIndex >= 0 && variantIndex < 3;
+        if (!isValidVariant)
+        {
+            return false;
+        }
+
+        // Arcano Vega: Acelerador, Desacelerador, Protector, Telerreparador.
+        if (groupTitle == "Vega" && (rowIndex == 12 || rowIndex == 13 || rowIndex == 16 || rowIndex == 17))
+        {
+            return true;
+        }
+
+        // Arcano Sol: Largo, Droide, Orbital, Carga.
+        if (groupTitle == "Sol" && (rowIndex == 20 || rowIndex == 21 || rowIndex == 22 || rowIndex == 23))
+        {
+            return true;
+        }
+
+        // Arcano Gemini: Protector, Telerreparador, C.Reparador, Resucitador.
+        if (groupTitle == "Gemini" && (rowIndex == 16 || rowIndex == 17 || rowIndex == 18 || rowIndex == 19))
+        {
+            return true;
+        }
+
+        // Arcano Antares: Acelerador, Desacelerador, Señuelo, Protector, Telerreparador, C.Reparador.
+        if (groupTitle == "Antares" && (rowIndex == 12 || rowIndex == 13 || rowIndex == 14 || rowIndex == 16 || rowIndex == 17 || rowIndex == 18))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static ArcanoMatrixGroup CreateArcanoMatrixGroup(string title, int activeRows)
+    {
+        var rows = new ArcanoMatrixRowState[ArcanoMatrixRowCount];
+        for (var rowIndex = 0; rowIndex < ArcanoMatrixRowCount; rowIndex++)
+        {
+            var isActive = rowIndex < activeRows;
+            var pttValue = isActive ? true : (bool?)null;
+            var norValue = isActive ? true : (bool?)null;
+            var agilValue = isActive ? true : (bool?)null;
+
+            if (IsArcanoMatrixCellUnavailable(title, rowIndex, 0))
+            {
+                pttValue = null;
+            }
+
+            if (IsArcanoMatrixCellUnavailable(title, rowIndex, 1))
+            {
+                norValue = null;
+            }
+
+            if (IsArcanoMatrixCellUnavailable(title, rowIndex, 2))
+            {
+                agilValue = null;
+            }
+
+            if (IsArcanoMatrixCellForcedAvailable(title, rowIndex, 0))
+            {
+                pttValue = true;
+            }
+
+            if (IsArcanoMatrixCellForcedAvailable(title, rowIndex, 1))
+            {
+                norValue = true;
+            }
+
+            if (IsArcanoMatrixCellForcedAvailable(title, rowIndex, 2))
+            {
+                agilValue = true;
+            }
+
+            rows[rowIndex] = new ArcanoMatrixRowState(new bool?[]
+            {
+                pttValue,
+                norValue,
+                agilValue,
+            });
+        }
+
+        return new ArcanoMatrixGroup(title, rows, activeRows);
+    }
+
+    private async Task LoadArcanoMatrixStateAsync()
+    {
+        try
+        {
+            var json = await JS.InvokeAsync<string>("localStorage.getItem", ArcanoMatrixStorageKey);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return;
+            }
+
+            var loaded = JsonSerializer.Deserialize<bool?[][][]>(json);
+            if (loaded is null || loaded.Length != ArcanoMatrixGroups.Length)
+            {
+                return;
+            }
+
+            for (var groupIndex = 0; groupIndex < ArcanoMatrixGroups.Length; groupIndex++)
+            {
+                if (loaded[groupIndex] is null || loaded[groupIndex].Length != ArcanoMatrixRows.Length)
+                {
+                    continue;
+                }
+
+                for (var rowIndex = 0; rowIndex < ArcanoMatrixRows.Length; rowIndex++)
+                {
+                    if (loaded[groupIndex][rowIndex] is null || loaded[groupIndex][rowIndex].Length != ArcanoMatrixVariants.Length)
+                    {
+                        continue;
+                    }
+
+                    for (var variantIndex = 0; variantIndex < ArcanoMatrixVariants.Length; variantIndex++)
+                    {
+                        if (IsArcanoMatrixCellUnavailable(ArcanoMatrixGroups[groupIndex].Title, rowIndex, variantIndex))
+                        {
+                            ArcanoMatrixGroups[groupIndex].Rows[rowIndex].Availability[variantIndex] = null;
+                            continue;
+                        }
+
+                        if (IsArcanoMatrixCellForcedAvailable(ArcanoMatrixGroups[groupIndex].Title, rowIndex, variantIndex))
+                        {
+                            ArcanoMatrixGroups[groupIndex].Rows[rowIndex].Availability[variantIndex] = true;
+                            continue;
+                        }
+
+                        ArcanoMatrixGroups[groupIndex].Rows[rowIndex].Availability[variantIndex] = loaded[groupIndex][rowIndex][variantIndex];
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Ignored: LocalStorage puede no estar disponible.
+        }
+    }
+
+    private async Task SaveArcanoMatrixStateAsync()
+    {
+        try
+        {
+            var payload = ArcanoMatrixGroups
+                .Select(group => group.Rows.Select(row => row.Availability.ToArray()).ToArray())
+                .ToArray();
+
+            var json = JsonSerializer.Serialize(payload);
+            await JS.InvokeVoidAsync("localStorage.setItem", ArcanoMatrixStorageKey, json);
+        }
+        catch
+        {
+            // Ignored: LocalStorage puede no estar disponible.
+        }
+    }
+
+    private async Task ToggleArcanoMatrixAvailability(int groupIndex, int rowIndex, int variantIndex)
+    {
+        var cell = ArcanoMatrixGroups[groupIndex].Rows[rowIndex].Availability[variantIndex];
+        if (cell.HasValue)
+        {
+            ArcanoMatrixGroups[groupIndex].Rows[rowIndex].Availability[variantIndex] = !cell.Value;
+            await SaveArcanoMatrixStateAsync();
+        }
+    }
+
+    private int CountArcanoMatrixMissing(ArcanoMatrixGroup group)
+    {
+        var count = 0;
+        foreach (var row in group.Rows)
+        {
+            foreach (var status in row.Availability)
+            {
+                if (status == false)
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
     private record BlueprintRow(string Name, string Color, params bool?[] Availability);
+
+    private sealed class ArcanoMatrixGroup
+    {
+        public ArcanoMatrixGroup(string title, ArcanoMatrixRowState[] rows, int activeRows)
+        {
+            Title = title;
+            Rows = rows;
+            ActiveRows = activeRows;
+        }
+
+        public string Title { get; }
+
+        public ArcanoMatrixRowState[] Rows { get; }
+
+        public int ActiveRows { get; }
+    }
+
+    private sealed class ArcanoMatrixRow
+    {
+        public ArcanoMatrixRow(string name, string color)
+        {
+            Name = name;
+            Color = color;
+        }
+
+        public string Name { get; }
+
+        public string Color { get; }
+    }
+
+    private sealed class ArcanoMatrixRowState
+    {
+        public ArcanoMatrixRowState(bool?[] availability)
+        {
+            Availability = availability;
+        }
+
+        public bool?[] Availability { get; }
+    }
 }

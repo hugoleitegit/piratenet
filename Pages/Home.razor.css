@@ -1,16 +1,18 @@
 .blueprint-container {
     padding: 18px 18px 22px;
-    background: #121212;
-    color: #fff;
-    font-family: 'Segoe UI', sans-serif;
+    color: #f2f2f2;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
     overflow-x: auto;
-    --header-bg: #d59a22;
-    --header-text: #111;
+    background: linear-gradient(180deg, rgba(67, 67, 67, 0.96) 0%, rgba(43, 43, 43, 0.96) 100%);
+    border: 1px solid #101010;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(255,255,255,0.03);
+    --header-bg: #4a627a;
+    --header-text: #f8f8f8;
     --available-bg: #bfe7cf;
     --missing-bg: #e9b7b4;
     --missing-text: #7f1d1d;
     --placeholder-bg: #1f1f1f;
-    --item-border: rgba(255,255,255,0.18);
+    --item-border: rgba(0,0,0,0.85);
 }
 
 .blueprint-header-row {
@@ -27,34 +29,45 @@
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: rgba(153, 82, 255, 0.2);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: linear-gradient(180deg, #6a2a9d 0%, #422061 100%);
+    border: 1px solid rgba(255,255,255,0.08);
     font-size: 22px;
     color: #ffd54a;
 }
 
 .blueprint-title {
     margin: 0;
-    color: #ffcc00;
-    font-size: clamp(2rem, 3vw, 3.2rem);
-    font-weight: 800;
+    color: #f6e08a;
+    font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+    font-weight: 700;
     letter-spacing: 0.02em;
 }
 
 .blueprint-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 10px;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 10px 0;
     margin-bottom: 14px;
     color: #f3f3f3;
     font-size: 0.95rem;
 }
 
+.blueprint-summary-table tr {
+    display: table-row;
+}
+
+.blueprint-summary-cell {
+    display: table-cell;
+    width: 16.6667%;
+    vertical-align: top;
+}
+
 .blueprint-summary-item {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.09);
     padding: 8px 10px;
-    border-radius: 6px;
+    border-radius: 2px;
 }
 
 .blueprint-table {
@@ -86,7 +99,7 @@
 }
 
 .blueprint-item {
-    background: rgba(255,255,255,0.9);
+    background: rgba(250,250,250,0.92);
     color: #111;
     font-weight: 700;
     text-align: left;
@@ -109,16 +122,25 @@
 }
 
 .blueprint-status.available {
-    background: var(--available-bg);
+    background: linear-gradient(180deg, #c9f0d8 0%, #a9d9c0 100%);
     color: #111;
 }
 
 .blueprint-status.missing {
-    background: var(--missing-bg);
+    background: linear-gradient(180deg, #efc0bd 0%, #e29f9c 100%);
     color: var(--missing-text);
 }
 
 .blueprint-placeholder {
     background: var(--placeholder-bg);
     min-width: 80px;
+}
+
+.arcano-matrix-stub-header {
+    width: 160px;
+}
+
+.arcano-matrix-empty-cell {
+    background: transparent;
+    border-color: transparent;
 }
