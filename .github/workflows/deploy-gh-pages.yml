@@ -18,7 +18,7 @@ jobs:
       - name: Restore
         run: dotnet restore
       - name: Publish
-        run: dotnet publish -c Release -o publish
+        run: dotnet publish -c Release -o publish -p:BaseHref=/piratenet/
       - name: Ensure .nojekyll
         run: mkdir -p publish/wwwroot && touch publish/wwwroot/.nojekyll
       - name: Deploy to gh-pages
