@@ -17,10 +17,11 @@
     <PropertyGroup>
       <!-- Default to root for development; override with -p:BaseHref=/your/path/ when publishing -->
       <BaseHref Condition="'$(BaseHref)'==''">/</BaseHref>
-      <PublishedIndexHtml>$(PublishDir)wwwroot\index.html</PublishedIndexHtml>
+      <PublishedIndexHtml>$(PublishDir)wwwroot/index.html</PublishedIndexHtml>
     </PropertyGroup>
     <Message Importance="High" Text="Setting base href to '$(BaseHref)' in $(PublishedIndexHtml)" />
-    <Exec Command="powershell -NoProfile -Command &quot;if (Test-Path '$(PublishedIndexHtml)') { (Get-Content '$(PublishedIndexHtml)') -replace '&lt;base\s+href=(?:&quot;[^&quot;]*&quot;|[^\s&gt;]+)\s*/?&gt;', '&lt;base href=&quot;$(BaseHref)&quot; /&gt;' | Set-Content '$(PublishedIndexHtml)' } else { Write-Host 'Published index not found: $(PublishedIndexHtml)' }&quot;" />
+    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="powershell -NoProfile -Command &quot;if (Test-Path '$(PublishedIndexHtml)') { (Get-Content '$(PublishedIndexHtml)') -replace '&lt;base\s+href=(?:&quot;[^&quot;]*&quot;|[^\s&gt;]+)\s*/?&gt;', '&lt;base href=&quot;$(BaseHref)&quot; /&gt;' | Set-Content '$(PublishedIndexHtml)' } else { Write-Host 'Published index not found: $(PublishedIndexHtml)' }&quot;" />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="pwsh -NoProfile -Command &quot;if (Test-Path '$(PublishedIndexHtml)') { (Get-Content '$(PublishedIndexHtml)') -replace '&lt;base\s+href=(?:&quot;[^&quot;]*&quot;|[^\s&gt;]+)\s*/?&gt;', '&lt;base href=&quot;$(BaseHref)&quot; /&gt;' | Set-Content '$(PublishedIndexHtml)' } else { Write-Host 'Published index not found: $(PublishedIndexHtml)' }&quot;" />
   </Target>
 
 </Project>

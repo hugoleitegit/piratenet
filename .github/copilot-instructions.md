@@ -21,6 +21,7 @@ Asistir en desarrollo y despliegue de `Piratenet` sin romper sincronizacion con 
 - Asegurar archivo `.nojekyll` en `gh-pages`.
 - `index.html` y `_framework/*` deben provenir del mismo `dotnet publish`.
 - No hacer parches manuales de `integrity` si no es imprescindible; preferir republicar limpio.
+- Despues de cada despliegue en produccion, comprobar el estado del workflow de GitHub Actions y reportar resultado (exito/fallo/en progreso) con enlace o identificador de ejecucion.
 
 ## 3) Reglas de seguridad Git
 - Pedir confirmacion antes de acciones destructivas.
@@ -35,6 +36,7 @@ Una tarea queda cerrada solo si:
 - Build/publish relevante completado sin errores.
 - `git status` queda limpio (o cambios claramente justificados).
 - Si hay deploy: push a `gh-pages` completado.
+- Si hay deploy en produccion: verificacion explicita del estado del workflow de deploy en GitHub Actions.
 - Si hay deploy: validacion minima de URL publica y recursos principales sin error.
 - Resumen final breve con: que se hizo, estado, y pendiente si aplica.
 
