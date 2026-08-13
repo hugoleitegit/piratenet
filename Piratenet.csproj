@@ -20,8 +20,8 @@
       <PublishedIndexHtml>$(PublishDir)wwwroot/index.html</PublishedIndexHtml>
     </PropertyGroup>
     <Message Importance="High" Text="Setting base href to '$(BaseHref)' in $(PublishedIndexHtml)" />
-    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="powershell -NoProfile -Command &quot;if (Test-Path '$(PublishedIndexHtml)') { (Get-Content '$(PublishedIndexHtml)') -replace '&lt;base\s+href=(?:&quot;[^&quot;]*&quot;|[^\s&gt;]+)\s*/?&gt;', '&lt;base href=&quot;$(BaseHref)&quot; /&gt;' | Set-Content '$(PublishedIndexHtml)' } else { Write-Host 'Published index not found: $(PublishedIndexHtml)' }&quot;" />
-    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="pwsh -NoProfile -Command &quot;if (Test-Path '$(PublishedIndexHtml)') { (Get-Content '$(PublishedIndexHtml)') -replace '&lt;base\s+href=(?:&quot;[^&quot;]*&quot;|[^\s&gt;]+)\s*/?&gt;', '&lt;base href=&quot;$(BaseHref)&quot; /&gt;' | Set-Content '$(PublishedIndexHtml)' } else { Write-Host 'Published index not found: $(PublishedIndexHtml)' }&quot;" />
+    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\build\Set-PublishedBaseHref.ps1&quot; &quot;$(PublishedIndexHtml)&quot; &quot;$(BaseHref)&quot;" />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="pwsh -NoProfile -File &quot;$(MSBuildProjectDirectory)/build/Set-PublishedBaseHref.ps1&quot; &quot;$(PublishedIndexHtml)&quot; &quot;$(BaseHref)&quot;" />
   </Target>
 
 </Project>
