@@ -1,0 +1,20 @@
+.arcanos-table {
+    min-width: 1500px;
+}
+
+.arcanos-table .arcano-matrix-stub-header {
+    width: 160px;
+}
+
+.arcanos-table .arcano-matrix-empty-cell {
+    background: transparent;
+    border-color: transparent;
+}
+
+.arcanos-table .blueprint-section-start .arcano-matrix-empty-cell {
+    border-top-color: transparent;
+}
+
+.arcanos-table .blueprint-section-start td {
+    border-top: 2px solid #111;
+}

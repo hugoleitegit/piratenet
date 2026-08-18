@@ -1,0 +1,359 @@
+@page "/tauceti"
+@using System.Text.Json
+@using Piratenet.Models
+@inject IJSRuntime JS
+@inject LanguageState LanguageState
+
+<PageTitle>Tau Ceti - Planos Arcanos</PageTitle>
+
+<div class="blueprint-container">
+    <table class="blueprint-table blueprint-table-compact tauceti-table">
+        <thead>
+            <tr>
+                <th class="arcano-matrix-stub-header" rowspan="2"></th>
+                <th colspan="9">Tau Ceti</th>
+                <th class="remanente-group-header" colspan="3">Remanente</th>
+            </tr>
+            <tr>
+                @foreach (var variant in Variants)
+                {
+                    <th>@GetVariantName(variant)</th>
+                }
+                @for (var variantIndex = 0; variantIndex < RemanenteVariants.Length; variantIndex++)
+                {
+                    <th class="remanente-col-header @(variantIndex == 0 ? "remanente-first-column" : null)">@GetVariantName(RemanenteVariants[variantIndex])</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (var rowIndex = 0; rowIndex < BlueprintRows.Length; rowIndex++)
+            {
+                var row = BlueprintRows[rowIndex];
+                var isSectionStart = rowIndex > 0 && row.Color != BlueprintRows[rowIndex - 1].Color;
+                <tr class="@(isSectionStart ? "tauceti-section-start" : null)">
+                    <td class="blueprint-item" style="background-color:@row.Color">@BlueprintCatalog.GetPlanName(row.Id, LanguageState.CurrentLanguage)</td>
+                    @for (var variantIndex = 0; variantIndex < Variants.Length; variantIndex++)
+                    {
+                        var clickedRowIndex = rowIndex;
+                        var clickedVariantIndex = variantIndex;
+                        var status = row.Availability[variantIndex];
+
+                        <td class="blueprint-status @(status ? "available" : "missing")"
+                            @onclick="() => ToggleAvailability(clickedRowIndex, clickedVariantIndex)"
+                            title="Haz clic para alternar">
+                            @(status ? "Y" : "N")
+                        </td>
+                    }
+                    @for (var variantIndex = 0; variantIndex < RemanenteVariants.Length; variantIndex++)
+                    {
+                        var clickedRowIndex = rowIndex;
+                        var clickedVariantIndex = variantIndex;
+                        var remanente = row.Remanente[variantIndex];
+
+                        <td class="remanente-status-cell @(variantIndex == 0 ? "remanente-first-column" : null)">
+                            <div class="remanente-counter">
+                                <span class="remanente-progress @(remanente.Plans == 0 && remanente.Objects == 0 ? "remanente-empty" : null)">@($"{remanente.Plans}/6")</span>
+                                <span class="remanente-stock">@($"x{remanente.Objects}")</span>
+                            </div>
+                            <div class="remanente-controls">
+                                <button type="button"
+                                        class="remanente-button"
+                                        @onclick="() => AddRemanentePlan(clickedRowIndex, clickedVariantIndex)"
+                                        disabled="@(remanente.Plans >= 6 || remanente.Objects >= 6 && remanente.Plans == 5)"
+                                        title="Añadir plano">+</button>
+                                <button type="button"
+                                        class="remanente-button"
+                                        @onclick="() => RemoveRemanentePlan(clickedRowIndex, clickedVariantIndex)"
+                                        disabled="@(remanente.Plans == 0)"
+                                        title="Quitar plano">−</button>
+                                <button type="button"
+                                        class="remanente-use-button"
+                                        @onclick="() => UseRemanente(clickedRowIndex, clickedVariantIndex)"
+                                        disabled="@(remanente.Objects == 0)"
+                                        title="Consumir un objeto">Usar</button>
+                            </div>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private static readonly string[] Variants = BlueprintCatalog.TauCetiVariants;
+    private static readonly string[] RemanenteVariants = BlueprintCatalog.RemanenteVariants;
+    private static readonly IReadOnlyDictionary<string, (string Spanish, string English)> VariantNames =
+        new Dictionary<string, (string, string)>
+        {
+            ["symbiotic"] = ("Simbiótico", "Symbiotic"),
+            ["perceptonic"] = ("Perceptrónico", "Perceptonic"),
+            ["multi_agent"] = ("Multi-agente", "Multi-agent"),
+            ["modal"] = ("Modal", "Modal"),
+            ["neural"] = ("Neural", "Neural"),
+            ["axiomatic"] = ("Axomático", "Axiomatic"),
+            ["thinking_body"] = ("Cuerpo pensante", "Thinking body"),
+            ["dendritic"] = ("Déndrico", "Dendritic"),
+            ["tau_ceti"] = ("Tau Ceti", "Tau Ceti"),
+            ["ptt"] = ("PTT", "PTT"),
+            ["normal"] = ("Normal", "Normal"),
+            ["agil"] = ("Agil", "Agile"),
+        };
+
+    private string GetVariantName(string variantId)
+    {
+        var names = VariantNames[variantId];
+        return LanguageState.CurrentLanguage.Equals("en", StringComparison.OrdinalIgnoreCase) ? names.English : names.Spanish;
+    }
+
+    private const string StorageKey = "piratenet.tauceti.matrix.v4";
+    private const string LegacyStorageKey = "piratenet.tauceti.matrix.v3";
+
+    private BlueprintRow[] BlueprintRows =
+    {
+        new("blaster", "#fff2cc", true, true, true, true, true, true, true, true, true),
+        new("collector", "#fff2cc", true, true, true, true, true, true, true, true, true),
+        new("repairer", "#fff2cc", true, true, true, true, true, true, true, true, true),
+        new("booster", "#fff2cc", true, true, true, true, true, true, true, true, true),
+        new("missiles", "#ff6666", true, true, true, true, true, true, true, true, true),
+        new("computer_sight", "#ff6666", true, true, true, true, true, true, true, true, true),
+        new("driller", "#ff6666", true, true, true, true, true, true, true, true, true),
+        new("thermal_ray", "#ff6666", true, true, true, true, true, true, true, true, true),
+        new("shield", "#ffd966", true, true, true, true, true, true, true, true, true),
+        new("miner", "#ffd966", true, true, true, true, true, true, true, true, true),
+        new("interference_signal", "#ffd966", true, true, true, true, true, true, true, true, true),
+        new("aggression_bomb", "#ffd966", true, true, true, true, true, true, true, true, true),
+        new("accelerator", "#9fc5e8", true, true, true, true, true, true, true, true, true),
+        new("decelerator", "#9fc5e8", true, true, true, true, true, true, true, true, true),
+        new("decoy", "#9fc5e8", true, true, true, true, true, true, true, true, true),
+        new("paralyzer", "#9fc5e8", true, true, true, true, true, true, true, true, true),
+        new("protector", "#b6d7a8", true, true, true, true, true, true, true, true, true),
+        new("tele_repairer", "#b6d7a8", true, true, true, true, true, true, true, true, true),
+        new("repair_field", "#b6d7a8", true, true, true, true, true, true, true, true, true),
+        new("resurrector", "#b6d7a8", true, true, true, true, true, true, true, true, true),
+        new("long_range", "#f6b26b", true, true, true, true, true, true, true, true, true),
+        new("attack_drone", "#f6b26b", true, true, true, true, true, true, true, true, true),
+        new("orbital", "#f6b26b", true, true, true, true, true, true, true, true, true),
+        new("attack_cargo", "#f6b26b", true, true, true, true, true, true, true, true, true),
+        new("attack_tower", "#f3a1ff", true, true, true, true, true, true, true, true, true),
+        new("repair_tower", "#f3a1ff", true, true, true, true, true, true, true, true, true),
+        new("mine", "#f3a1ff", true, true, true, true, true, true, true, true, true),
+        new("lapa_bomb", "#f3a1ff", true, true, true, true, true, true, true, true, true),
+        new("absorber", "#8f9aa3", true, true, true, true, true, true, true, true, true),
+        new("inverter", "#8f9aa3", true, true, true, true, true, true, true, true, true),
+        new("trap", "#8f9aa3", true, true, true, true, true, true, true, true, true),
+        new("jump", "#8f9aa3", true, true, true, true, true, true, true, true, true),
+        new("cloud", "#8f9aa3", true, true, true, true, true, true, true, true, true),
+        new("deflector", "#8f9aa3", true, true, true, true, true, true, true, true, true),
+        new("aura", "#8f9aa3", true, true, true, true, true, true, true, true, true),
+        new("electric_beam", "#8f9aa3", true, true, true, true, true, true, true, true, true),
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LanguageState.LoadAsync(JS);
+            await LoadStateAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadStateAsync()
+    {
+        try
+        {
+            var json = await JS.InvokeAsync<string>("localStorage.getItem", StorageKey);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                json = await JS.InvokeAsync<string>("localStorage.getItem", LegacyStorageKey);
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    return;
+                }
+
+                var legacy = JsonSerializer.Deserialize<TaucetiState[]>(json);
+                if (legacy is null)
+                {
+                    return;
+                }
+
+                ApplyLegacyState(legacy);
+                await SaveStateAsync();
+                return;
+            }
+
+            var stored = JsonSerializer.Deserialize<TaucetiStoredState>(json);
+            if (stored?.Values is null)
+            {
+                return;
+            }
+
+            for (var rowIndex = 0; rowIndex < BlueprintRows.Length; rowIndex++)
+            {
+                for (var variantIndex = 0; variantIndex < Variants.Length; variantIndex++)
+                {
+                    var key = BlueprintCatalog.TauCetiKey(BlueprintRows[rowIndex].Id, Variants[variantIndex]);
+                    if (stored.Values.TryGetValue(key, out var value) && value is bool status)
+                    {
+                        BlueprintRows[rowIndex].Availability[variantIndex] = status;
+                    }
+                }
+
+                for (var variantIndex = 0; variantIndex < RemanenteVariants.Length; variantIndex++)
+                {
+                    var key = BlueprintCatalog.RemanenteKey(BlueprintRows[rowIndex].Id, RemanenteVariants[variantIndex]);
+                    if (stored.Remanente.TryGetValue(key, out var remanente) && IsValidRemanenteState(remanente))
+                    {
+                        BlueprintRows[rowIndex].Remanente[variantIndex] = remanente;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // localStorage puede no estar disponible en algunos contextos.
+        }
+    }
+
+    private static bool IsValidRemanenteState(RemanenteState? remanente)
+    {
+        return remanente is not null
+            && remanente.Plans >= 0
+            && remanente.Plans <= 5
+            && remanente.Objects >= 0
+            && remanente.Objects <= 6;
+    }
+
+    private void ApplyLegacyState(TaucetiState[] legacy)
+    {
+        for (var rowIndex = 0; rowIndex < BlueprintRows.Length && rowIndex < legacy.Length; rowIndex++)
+        {
+            if (legacy[rowIndex]?.Availability is not null && legacy[rowIndex].Availability.Length == Variants.Length)
+            {
+                BlueprintRows[rowIndex].Availability = legacy[rowIndex].Availability;
+            }
+
+            if (legacy[rowIndex]?.Remanente is not null && legacy[rowIndex].Remanente.Length == RemanenteVariants.Length
+                && legacy[rowIndex].Remanente.All(IsValidRemanenteState))
+            {
+                BlueprintRows[rowIndex].Remanente = legacy[rowIndex].Remanente;
+            }
+        }
+    }
+
+    private async Task ToggleAvailability(int rowIndex, int variantIndex)
+    {
+        BlueprintRows[rowIndex].Availability[variantIndex] = !BlueprintRows[rowIndex].Availability[variantIndex];
+        await SaveStateAsync();
+    }
+
+    private async Task AddRemanentePlan(int rowIndex, int variantIndex)
+    {
+        var remanente = BlueprintRows[rowIndex].Remanente[variantIndex];
+        if (remanente.Plans >= 6 || (remanente.Plans == 5 && remanente.Objects >= 6))
+        {
+            return;
+        }
+
+        remanente.Plans++;
+        if (remanente.Plans == 6 && remanente.Objects < 6)
+        {
+            remanente.Plans = 0;
+            remanente.Objects++;
+        }
+
+        await SaveStateAsync();
+    }
+
+    private async Task RemoveRemanentePlan(int rowIndex, int variantIndex)
+    {
+        var remanente = BlueprintRows[rowIndex].Remanente[variantIndex];
+        if (remanente.Plans == 0)
+        {
+            return;
+        }
+
+        remanente.Plans--;
+        await SaveStateAsync();
+    }
+
+    private async Task UseRemanente(int rowIndex, int variantIndex)
+    {
+        var remanente = BlueprintRows[rowIndex].Remanente[variantIndex];
+        if (remanente.Objects == 0)
+        {
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "¿Quieres consumir 1 objeto Remanente?");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        remanente.Objects--;
+        await SaveStateAsync();
+    }
+
+    private async Task SaveStateAsync()
+    {
+        try
+        {
+            var values = new Dictionary<string, bool?>();
+            var remanente = new Dictionary<string, RemanenteState>();
+            for (var rowIndex = 0; rowIndex < BlueprintRows.Length; rowIndex++)
+            {
+                for (var variantIndex = 0; variantIndex < Variants.Length; variantIndex++)
+                {
+                    values[BlueprintCatalog.TauCetiKey(BlueprintRows[rowIndex].Id, Variants[variantIndex])] = BlueprintRows[rowIndex].Availability[variantIndex];
+                }
+
+                for (var variantIndex = 0; variantIndex < RemanenteVariants.Length; variantIndex++)
+                {
+                    remanente[BlueprintCatalog.RemanenteKey(BlueprintRows[rowIndex].Id, RemanenteVariants[variantIndex])] = BlueprintRows[rowIndex].Remanente[variantIndex];
+                }
+            }
+
+            await JS.InvokeVoidAsync("localStorage.setItem", StorageKey, JsonSerializer.Serialize(new TaucetiStoredState(4, values, remanente)));
+        }
+        catch
+        {
+            // localStorage puede no estar disponible en algunos contextos.
+        }
+    }
+
+    private sealed class BlueprintRow
+    {
+        public BlueprintRow(string id, string color, params bool[] availability)
+        {
+            Id = id;
+            Color = color;
+            Availability = availability;
+        }
+
+        public string Id { get; }
+
+        public string Color { get; }
+
+        public bool[] Availability { get; set; }
+
+        public RemanenteState[] Remanente { get; set; } =
+        {
+            new(),
+            new(),
+            new(),
+        };
+    }
+
+    private sealed class RemanenteState
+    {
+        public int Plans { get; set; }
+
+        public int Objects { get; set; }
+    }
+
+    private sealed record TaucetiState(bool[] Availability, RemanenteState[] Remanente);
+
+    private sealed record TaucetiStoredState(int Version, Dictionary<string, bool?> Values, Dictionary<string, RemanenteState> Remanente);
+}

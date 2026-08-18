@@ -1,34 +1,26 @@
 ﻿@page "/"
 @using System.Text.Json
+@using Piratenet.Models
 @inject IJSRuntime JS
+@inject LanguageState LanguageState
 
-<PageTitle>Piratenet - Planos Dorados Pirate Galaxy</PageTitle>
+<PageTitle>Piratenet - Planos dorados de sistemas</PageTitle>
 
 <div class="blueprint-container">
-    <div class="blueprint-header-row">
-        <div class="blueprint-mark">☠</div>
-        <h2 class="blueprint-title">Piratenet: Planos Dorados - Completo</h2>
-    </div>
-
-    <table class="blueprint-summary blueprint-summary-table">
-        <tbody>
-            <tr>
-                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Vega: <strong>@CountMissing(0)</strong></td>
-                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Antares: <strong>@CountMissing(1)</strong></td>
-                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Gemini: <strong>@CountMissing(2)</strong></td>
-                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Mizar: <strong>@CountMissing(3)</strong></td>
-                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Sol: <strong>@CountMissing(4)</strong></td>
-                <td class="blueprint-summary-item blueprint-summary-cell">Quedan Draconis: <strong>@CountMissing(5)</strong></td>
-            </tr>
-        </tbody>
-    </table>
-
     <table class="blueprint-table blueprint-table-compact">
         <thead>
             <tr>
-                @foreach (var system in Systems)
+                @for (var systemIndex = 0; systemIndex < SystemIds.Length; systemIndex++)
                 {
-                    <th colspan="2">@system</th>
+                    @if (systemIndex == 0)
+                    {
+                        <th></th>
+                        <th>@BlueprintCatalog.GetSystemName(SystemIds[systemIndex], LanguageState.CurrentLanguage)</th>
+                    }
+                    else
+                    {
+                        <th>@BlueprintCatalog.GetSystemName(SystemIds[systemIndex], LanguageState.CurrentLanguage)</th>
+                    }
                 }
             </tr>
         </thead>
@@ -36,16 +28,21 @@
             @for (var rowIndex = 0; rowIndex < BlueprintRows.Length; rowIndex++)
             {
                 var row = BlueprintRows[rowIndex];
-                <tr>
-                    @for (var systemIndex = 0; systemIndex < Systems.Length; systemIndex++)
+                var isSectionStart = rowIndex > 0 && row.Color != BlueprintRows[rowIndex - 1].Color;
+                <tr class="@(isSectionStart ? "blueprint-section-start" : null)">
+                    @for (var systemIndex = 0; systemIndex < SystemIds.Length; systemIndex++)
                     {
-                        var status = row.Availability[systemIndex];
+                        var availabilityIndex = GetAvailabilityIndex(systemIndex);
+                        var status = row.Availability[availabilityIndex];
                         if (status.HasValue)
                         {
                             var clickedRowIndex = rowIndex;
                             var clickedSystemIndex = systemIndex;
 
-                            <td class="blueprint-item" style="background-color:@row.Color">@row.Name</td>
+                            @if (systemIndex == 0)
+                            {
+                                <td class="blueprint-item" style="background-color:@row.Color">@BlueprintCatalog.GetPlanName(row.Id, LanguageState.CurrentLanguage)</td>
+                            }
                             <td class="blueprint-status @(status.Value ? "available" : "missing")"
                                 @onclick="() => ToggleAvailability(clickedRowIndex, clickedSystemIndex)"
                                 title="Haz clic para alternar">
@@ -54,84 +51,11 @@
                         }
                         else
                         {
-                            <td class="blueprint-placeholder"></td>
-                            <td class="blueprint-placeholder"></td>
-                        }
-                    }
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-<div class="blueprint-container" style="margin-top: 2rem;">
-    <div class="blueprint-header-row">
-        <div class="blueprint-mark">✦</div>
-        <h2 class="blueprint-title">Tecnologia Arcana de Sistemas</h2>
-    </div>
-
-    <table class="blueprint-summary blueprint-summary-table">
-        <tbody>
-            <tr>
-                @foreach (var group in ArcanoMatrixGroups)
-                {
-                    <td class="blueprint-summary-item blueprint-summary-cell">Quedan @group.Title: <strong>@CountArcanoMatrixMissing(group)</strong></td>
-                }
-            </tr>
-        </tbody>
-    </table>
-
-    <table class="blueprint-table blueprint-table-compact">
-        <thead>
-            <tr>
-                <th class="arcano-matrix-stub-header" rowspan="2"></th>
-                @for (var groupIndex = 0; groupIndex < ArcanoMatrixGroups.Length; groupIndex++)
-                {
-                    <th colspan="3">Arcano @ArcanoMatrixGroups[groupIndex].Title</th>
-                }
-            </tr>
-            <tr>
-                @foreach (var group in ArcanoMatrixGroups)
-                {
-                    @foreach (var variant in ArcanoMatrixVariants)
-                    {
-                        <th>@variant</th>
-                    }
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @for (var rowIndex = 0; rowIndex < ArcanoMatrixRows.Length; rowIndex++)
-            {
-                var row = ArcanoMatrixRows[rowIndex];
-                <tr>
-                    <td class="blueprint-item" style="background-color:@row.Color">@row.Name</td>
-                    @for (var groupIndex = 0; groupIndex < ArcanoMatrixGroups.Length; groupIndex++)
-                    {
-                        var group = ArcanoMatrixGroups[groupIndex];
-                        var groupRow = group.Rows[rowIndex];
-
-                        @for (var variantIndex = 0; variantIndex < ArcanoMatrixVariants.Length; variantIndex++)
-                        {
-                            var cell = groupRow.Availability[variantIndex];
-
-                            if (cell.HasValue)
+                            @if (systemIndex == 0)
                             {
-                                var clickedGroupIndex = groupIndex;
-                                var clickedRowIndex = rowIndex;
-                                var clickedVariantIndex = variantIndex;
-                                var isAvailable = cell.Value;
-
-                                <td class="blueprint-status @(isAvailable ? "available" : "missing")"
-                                    @onclick="() => ToggleArcanoMatrixAvailability(clickedGroupIndex, clickedRowIndex, clickedVariantIndex)"
-                                    title="Haz clic para alternar">
-                                    @(isAvailable ? "Y" : "N")
-                                </td>
+                                <td class="blueprint-item" style="background-color:@row.Color">@BlueprintCatalog.GetPlanName(row.Id, LanguageState.CurrentLanguage)</td>
                             }
-                            else
-                            {
-                                <td class="blueprint-placeholder arcano-matrix-empty-cell"></td>
-                            }
+                            <td class="blueprint-placeholder"></td>
                         }
                     }
                 </tr>
@@ -141,122 +65,87 @@
 </div>
 
 @code {
-    private readonly string[] Systems = new[] { "Vega", "Antares", "Gemini", "Mizar", "Sol", "Draconis" };
+    private readonly string[] SystemIds = BlueprintCatalog.GoldDisplaySystems;
 
     private BlueprintRow[] BlueprintRows =
     {
-        new("Cañón", "#ffffff", true, true, true, true, true, true),
-        new("Recolector", "#ffffff", true, true, true, true, true, true),
-        new("Reparador", "#ffffff", true, true, true, true, true, true),
-        new("Impulsor", "#ffffff", true, true, true, true, true, true),
+        new("blaster", "#ffffff", true, true, true, true, true, true),
+        new("collector", "#ffffff", true, true, true, true, true, true),
+        new("repairer", "#ffffff", true, true, true, true, true, true),
+        new("booster", "#ffffff", true, true, true, true, true, true),
 
-        new("Misil", "#d98880", true, true, true, true, true, true),
-        new("Mira", "#d98880", true, true, true, true, true, true),
-        new("Perforador", "#d98880", null, true, true, true, true, true),
-        new("Rayo Térmico", "#d98880", null, null, true, true, true, true, true),
+        new("missiles", "#d98880", true, true, true, true, true, true),
+        new("computer_sight", "#d98880", true, true, true, true, true, true),
+        new("driller", "#d98880", null, true, true, true, true, true),
+        new("thermal_ray", "#d98880", null, null, true, true, true, true),
 
-        new("Escudo", "#f9e79f", true, true, true, true, true, true),
-        new("Picador", "#f9e79f", true, true, true, true, true, true),
-        new("Señal", "#f9e79f", null, true, true, true, true, true),
-        new("Bomba", "#f9e79f", null, null, true, true, true, true, true),
+        new("shield", "#f9e79f", true, true, true, true, true, true),
+        new("miner", "#f9e79f", true, true, true, true, true, true),
+        new("interference_signal", "#f9e79f", null, true, true, true, true, true),
+        new("aggression_bomb", "#f9e79f", null, null, true, true, true, true),
 
-        new("Acelerador", "#85c1e9", true, true, true, true, true, true),
-        new("Desacelerador", "#85c1e9", true, true, true, true, true, true),
-        new("Señuelo", "#85c1e9", null, true, true, true, true, true),
-        new("Paralizador", "#85c1e9", null, null, true, true, true, true, true),
+        new("accelerator", "#85c1e9", true, true, true, true, true, true),
+        new("decelerator", "#85c1e9", true, true, true, true, true, true),
+        new("decoy", "#85c1e9", null, true, true, true, true, true),
+        new("paralyzer", "#85c1e9", null, null, true, true, true, true),
 
-        new("Protector", "#a9dfbf", true, true, true, true, true, true),
-        new("Telerreparador", "#a9dfbf", true, true, true, true, true, true),
-        new("C.Reparador", "#a9dfbf", null, true, true, true, true, true),
-        new("Resucitador", "#a9dfbf", null, null, true, true, true, true, true),
+        new("protector", "#a9dfbf", true, true, true, true, true, true),
+        new("tele_repairer", "#a9dfbf", true, true, true, true, true, true),
+        new("repair_field", "#a9dfbf", null, true, true, true, true, true),
+        new("resurrector", "#a9dfbf", null, null, true, true, true, true),
 
-        new("Largo", "#eb984e", null, null, null, true, true, true),
-        new("Droide", "#eb984e", null, null, null, true, true, true),
-        new("Orbital", "#eb984e", null, null, null, true, true, true),
-        new("Carga", "#eb984e", null, null, null, true, true, true),
+        new("long_range", "#eb984e", null, null, null, true, true, true),
+        new("attack_drone", "#eb984e", null, null, null, true, true, true),
+        new("orbital", "#eb984e", null, null, null, true, true, true),
+        new("attack_cargo", "#eb984e", null, null, null, true, true, true),
 
-        new("T.Ataque", "#bb8fce", null, null, null, true, true, false),
-        new("T.Repa", "#bb8fce", null, null, null, true, true, false),
-        new("Mina", "#bb8fce", null, null, null, true, true, false),
-        new("Lapa", "#bb8fce", null, null, null, true, true, false),
+        new("attack_tower", "#bb8fce", null, null, null, true, true, false),
+        new("repair_tower", "#bb8fce", null, null, null, true, true, false),
+        new("mine", "#bb8fce", null, null, null, true, true, false),
+        new("lapa_bomb", "#bb8fce", null, null, null, true, true, false),
 
-        new("Haz eléctrico", "#d5d8dc", null, null, null, true, true, true),
+        new("absorber", "#a6b0b7", null, null, null, true, true, true),
+        new("inverter", "#a6b0b7", null, null, null, true, true, true),
+        new("trap", "#a6b0b7", null, null, null, true, true, true),
+        new("jump", "#a6b0b7", null, null, null, true, true, true),
+        new("cloud", "#a6b0b7", null, null, null, true, true, true),
+        new("deflector", "#a6b0b7", null, null, null, true, true, true),
+        new("aura", "#a6b0b7", null, null, null, true, true, true),
+        new("electric_beam", "#a6b0b7", null, null, null, true, true, true),
     };
 
-    private static readonly string[] ArcanoMatrixVariants = new[] { "PTT", "NOR", "AGIL" };
-
-    private const int ArcanoMatrixRowCount = 28;
-
-    private readonly ArcanoMatrixGroup[] ArcanoMatrixGroups =
+    private int GetAvailabilityIndex(int displayedSystemIndex)
     {
-        CreateArcanoMatrixGroup("Draconis", 28),
-        CreateArcanoMatrixGroup("Sol", 24),
-        CreateArcanoMatrixGroup("Mizar", 20),
-        CreateArcanoMatrixGroup("Gemini", 16),
-        CreateArcanoMatrixGroup("Antares", 12),
-        CreateArcanoMatrixGroup("Vega", 12),
-    };
-
-    private static readonly ArcanoMatrixRow[] ArcanoMatrixRows =
-    {
-        new("Cañón", "#fff2cc"),
-        new("Recolector", "#fff2cc"),
-        new("Reparador", "#fff2cc"),
-        new("Impulsor", "#fff2cc"),
-        new("Misil", "#ff6666"),
-        new("Mira", "#ff6666"),
-        new("Perforador", "#ff6666"),
-        new("Rayo Térmico", "#ff6666"),
-        new("Escudo", "#ffd966"),
-        new("Picador", "#ffd966"),
-        new("Señal", "#ffd966"),
-        new("Bomba", "#ffd966"),
-        new("Acelerador", "#9fc5e8"),
-        new("Desacelerador", "#9fc5e8"),
-        new("Señuelo", "#9fc5e8"),
-        new("Paralizador", "#9fc5e8"),
-        new("Protector", "#b6d7a8"),
-        new("Telerreparador", "#b6d7a8"),
-        new("C.Reparador", "#b6d7a8"),
-        new("Resucitador", "#b6d7a8"),
-        new("Largo", "#f6b26b"),
-        new("Droide", "#f6b26b"),
-        new("Orbital", "#f6b26b"),
-        new("Carga", "#f6b26b"),
-        new("T.Ataque", "#f3a1ff"),
-        new("T.Repa", "#f3a1ff"),
-        new("Mina", "#f3a1ff"),
-        new("Lapa", "#f3a1ff"),
-    };
-
-    private int CountMissing(int systemIndex)
-    {
-        var count = 0;
-        foreach (var row in BlueprintRows)
-        {
-            if (systemIndex < row.Availability.Length && row.Availability[systemIndex] == false)
-            {
-                count++;
-            }
-        }
-        return count;
+        return SystemIds.Length - 1 - displayedSystemIndex;
     }
 
-    private const string StorageKey = "piratenet.blueprints.v1";
+    private string GetStoredSystemId(int availabilityIndex)
+    {
+        return SystemIds[SystemIds.Length - 1 - availabilityIndex];
+    }
 
-    private int ClickCount { get; set; }
-    private string LastClicked { get; set; } = "ninguno";
+    private const string StorageKey = "piratenet.blueprints.v3";
+    private const string LegacyStorageKey = "piratenet.blueprints.v2";
 
+    /// <summary>
+    /// Carga los estados persistidos despues del primer renderizado interactivo.
+    /// Se ejecuta una sola vez para evitar sobrescribir cambios posteriores del usuario.
+    /// </summary>
+    /// <param name="firstRender">Indica si es el primer renderizado del componente.</param>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            await LanguageState.LoadAsync(JS);
             await LoadStateAsync();
-            await LoadArcanoMatrixStateAsync();
             StateHasChanged();
         }
     }
 
+    /// <summary>
+    /// Recupera desde localStorage el estado de la tabla de planos dorados.
+    /// Los datos solo se aplican si conservan la misma forma que la configuracion actual.
+    /// </summary>
     private async Task LoadStateAsync()
     {
         try
@@ -264,25 +153,48 @@
             var json = await JS.InvokeAsync<string>("localStorage.getItem", StorageKey);
             if (string.IsNullOrWhiteSpace(json))
             {
+                json = await JS.InvokeAsync<string>("localStorage.getItem", LegacyStorageKey);
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    return;
+                }
+
+                var legacy = JsonSerializer.Deserialize<bool?[][]>(json);
+                if (legacy is null || legacy.Length != BlueprintRows.Length)
+                {
+                    return;
+                }
+
+                for (var rowIndex = 0; rowIndex < BlueprintRows.Length; rowIndex++)
+                {
+                    for (var availabilityIndex = 0; availabilityIndex < SystemIds.Length; availabilityIndex++)
+                    {
+                        if (legacy[rowIndex] is not null && availabilityIndex < legacy[rowIndex].Length)
+                        {
+                            BlueprintRows[rowIndex].Availability[availabilityIndex] = legacy[rowIndex][availabilityIndex];
+                        }
+                    }
+                }
+
+                await SaveStateAsync();
                 return;
             }
 
-            var loaded = JsonSerializer.Deserialize<bool?[][]>(json);
-            if (loaded is null || loaded.Length != BlueprintRows.Length)
+            var stored = JsonSerializer.Deserialize<StoredBooleanValues>(json);
+            if (stored?.Values is null)
             {
                 return;
             }
 
             for (var rowIndex = 0; rowIndex < BlueprintRows.Length; rowIndex++)
             {
-                if (loaded[rowIndex] is null || loaded[rowIndex].Length != BlueprintRows[rowIndex].Availability.Length)
+                for (var availabilityIndex = 0; availabilityIndex < SystemIds.Length; availabilityIndex++)
                 {
-                    continue;
-                }
-
-                for (var systemIndex = 0; systemIndex < BlueprintRows[rowIndex].Availability.Length; systemIndex++)
-                {
-                    BlueprintRows[rowIndex].Availability[systemIndex] = loaded[rowIndex][systemIndex];
+                    var configuredValue = BlueprintRows[rowIndex].Availability[availabilityIndex];
+                    var key = BlueprintCatalog.GoldKey(GetStoredSystemId(availabilityIndex), BlueprintRows[rowIndex].Id);
+                    BlueprintRows[rowIndex].Availability[availabilityIndex] = configuredValue.HasValue && stored.Values.TryGetValue(key, out var value)
+                        ? value
+                        : null;
                 }
             }
         }
@@ -292,15 +204,23 @@
         }
     }
 
+    /// <summary>
+    /// Serializa y guarda en localStorage el estado actual de los planos dorados.
+    /// </summary>
     private async Task SaveStateAsync()
     {
         try
         {
-            var payload = BlueprintRows
-                .Select(row => row.Availability.ToArray())
-                .ToArray();
+            var values = new Dictionary<string, bool?>();
+            for (var rowIndex = 0; rowIndex < BlueprintRows.Length; rowIndex++)
+            {
+                for (var availabilityIndex = 0; availabilityIndex < SystemIds.Length; availabilityIndex++)
+                {
+                    values[BlueprintCatalog.GoldKey(GetStoredSystemId(availabilityIndex), BlueprintRows[rowIndex].Id)] = BlueprintRows[rowIndex].Availability[availabilityIndex];
+                }
+            }
 
-            var json = JsonSerializer.Serialize(payload);
+            var json = JsonSerializer.Serialize(new StoredBooleanValues(3, values));
             await JS.InvokeVoidAsync("localStorage.setItem", StorageKey, json);
         }
         catch
@@ -309,268 +229,24 @@
         }
     }
 
-    private async Task TestClick()
-    {
-        ClickCount++;
-        LastClicked = "botón global";
-        await SaveStateAsync();
-    }
-
+    /// <summary>
+    /// Alterna entre disponible y pendiente una celda existente de la tabla dorada.
+    /// Las celdas inexistentes no se modifican.
+    /// </summary>
+    /// <param name="rowIndex">Indice de la fila del plano.</param>
+    /// <param name="systemIndex">Indice del sistema al que pertenece la celda.</param>
     private async Task ToggleAvailability(int rowIndex, int systemIndex)
     {
-        ClickCount++;
-        LastClicked = $"fila {rowIndex}, sistema {Systems[systemIndex]}";
-
-        var current = BlueprintRows[rowIndex].Availability[systemIndex];
+        var availabilityIndex = GetAvailabilityIndex(systemIndex);
+        var current = BlueprintRows[rowIndex].Availability[availabilityIndex];
         if (current.HasValue)
         {
-            BlueprintRows[rowIndex].Availability[systemIndex] = !current.Value;
+            BlueprintRows[rowIndex].Availability[availabilityIndex] = !current.Value;
             await SaveStateAsync();
         }
     }
 
-    private const string ArcanoMatrixStorageKey = "piratenet.arcano.matrix.v2";
+    private sealed record BlueprintRow(string Id, string Color, params bool?[] Availability);
 
-    private static bool IsArcanoMatrixCellUnavailable(string groupTitle, int rowIndex, int variantIndex)
-    {
-        // En Arcano Vega, estas filas no existen en PTT/NOR/AGIL y deben mostrarse vacias.
-        var isVegaUnavailable = groupTitle == "Vega"
-            && (rowIndex == 6 || rowIndex == 7 || rowIndex == 10 || rowIndex == 11)
-            && variantIndex >= 0
-            && variantIndex < 3;
-
-        // En Arcano Antares, Rayo Térmico y Bomba no existen en PTT/NOR/AGIL.
-        var isAntaresUnavailable = groupTitle == "Antares"
-            && (rowIndex == 7 || rowIndex == 11)
-            && variantIndex >= 0
-            && variantIndex < 3;
-
-        return isVegaUnavailable || isAntaresUnavailable;
-    }
-
-    private static bool IsArcanoMatrixCellForcedAvailable(string groupTitle, int rowIndex, int variantIndex)
-    {
-        var isValidVariant = variantIndex >= 0 && variantIndex < 3;
-        if (!isValidVariant)
-        {
-            return false;
-        }
-
-        // Arcano Vega: Acelerador, Desacelerador, Protector, Telerreparador.
-        if (groupTitle == "Vega" && (rowIndex == 12 || rowIndex == 13 || rowIndex == 16 || rowIndex == 17))
-        {
-            return true;
-        }
-
-        // Arcano Sol: Largo, Droide, Orbital, Carga.
-        if (groupTitle == "Sol" && (rowIndex == 20 || rowIndex == 21 || rowIndex == 22 || rowIndex == 23))
-        {
-            return true;
-        }
-
-        // Arcano Gemini: Protector, Telerreparador, C.Reparador, Resucitador.
-        if (groupTitle == "Gemini" && (rowIndex == 16 || rowIndex == 17 || rowIndex == 18 || rowIndex == 19))
-        {
-            return true;
-        }
-
-        // Arcano Antares: Acelerador, Desacelerador, Señuelo, Protector, Telerreparador, C.Reparador.
-        if (groupTitle == "Antares" && (rowIndex == 12 || rowIndex == 13 || rowIndex == 14 || rowIndex == 16 || rowIndex == 17 || rowIndex == 18))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private static ArcanoMatrixGroup CreateArcanoMatrixGroup(string title, int activeRows)
-    {
-        var rows = new ArcanoMatrixRowState[ArcanoMatrixRowCount];
-        for (var rowIndex = 0; rowIndex < ArcanoMatrixRowCount; rowIndex++)
-        {
-            var isActive = rowIndex < activeRows;
-            var pttValue = isActive ? true : (bool?)null;
-            var norValue = isActive ? true : (bool?)null;
-            var agilValue = isActive ? true : (bool?)null;
-
-            if (IsArcanoMatrixCellUnavailable(title, rowIndex, 0))
-            {
-                pttValue = null;
-            }
-
-            if (IsArcanoMatrixCellUnavailable(title, rowIndex, 1))
-            {
-                norValue = null;
-            }
-
-            if (IsArcanoMatrixCellUnavailable(title, rowIndex, 2))
-            {
-                agilValue = null;
-            }
-
-            if (IsArcanoMatrixCellForcedAvailable(title, rowIndex, 0))
-            {
-                pttValue = true;
-            }
-
-            if (IsArcanoMatrixCellForcedAvailable(title, rowIndex, 1))
-            {
-                norValue = true;
-            }
-
-            if (IsArcanoMatrixCellForcedAvailable(title, rowIndex, 2))
-            {
-                agilValue = true;
-            }
-
-            rows[rowIndex] = new ArcanoMatrixRowState(new bool?[]
-            {
-                pttValue,
-                norValue,
-                agilValue,
-            });
-        }
-
-        return new ArcanoMatrixGroup(title, rows, activeRows);
-    }
-
-    private async Task LoadArcanoMatrixStateAsync()
-    {
-        try
-        {
-            var json = await JS.InvokeAsync<string>("localStorage.getItem", ArcanoMatrixStorageKey);
-            if (string.IsNullOrWhiteSpace(json))
-            {
-                return;
-            }
-
-            var loaded = JsonSerializer.Deserialize<bool?[][][]>(json);
-            if (loaded is null || loaded.Length != ArcanoMatrixGroups.Length)
-            {
-                return;
-            }
-
-            for (var groupIndex = 0; groupIndex < ArcanoMatrixGroups.Length; groupIndex++)
-            {
-                if (loaded[groupIndex] is null || loaded[groupIndex].Length != ArcanoMatrixRows.Length)
-                {
-                    continue;
-                }
-
-                for (var rowIndex = 0; rowIndex < ArcanoMatrixRows.Length; rowIndex++)
-                {
-                    if (loaded[groupIndex][rowIndex] is null || loaded[groupIndex][rowIndex].Length != ArcanoMatrixVariants.Length)
-                    {
-                        continue;
-                    }
-
-                    for (var variantIndex = 0; variantIndex < ArcanoMatrixVariants.Length; variantIndex++)
-                    {
-                        if (IsArcanoMatrixCellUnavailable(ArcanoMatrixGroups[groupIndex].Title, rowIndex, variantIndex))
-                        {
-                            ArcanoMatrixGroups[groupIndex].Rows[rowIndex].Availability[variantIndex] = null;
-                            continue;
-                        }
-
-                        if (IsArcanoMatrixCellForcedAvailable(ArcanoMatrixGroups[groupIndex].Title, rowIndex, variantIndex))
-                        {
-                            ArcanoMatrixGroups[groupIndex].Rows[rowIndex].Availability[variantIndex] = true;
-                            continue;
-                        }
-
-                        ArcanoMatrixGroups[groupIndex].Rows[rowIndex].Availability[variantIndex] = loaded[groupIndex][rowIndex][variantIndex];
-                    }
-                }
-            }
-        }
-        catch
-        {
-            // Ignored: LocalStorage puede no estar disponible.
-        }
-    }
-
-    private async Task SaveArcanoMatrixStateAsync()
-    {
-        try
-        {
-            var payload = ArcanoMatrixGroups
-                .Select(group => group.Rows.Select(row => row.Availability.ToArray()).ToArray())
-                .ToArray();
-
-            var json = JsonSerializer.Serialize(payload);
-            await JS.InvokeVoidAsync("localStorage.setItem", ArcanoMatrixStorageKey, json);
-        }
-        catch
-        {
-            // Ignored: LocalStorage puede no estar disponible.
-        }
-    }
-
-    private async Task ToggleArcanoMatrixAvailability(int groupIndex, int rowIndex, int variantIndex)
-    {
-        var cell = ArcanoMatrixGroups[groupIndex].Rows[rowIndex].Availability[variantIndex];
-        if (cell.HasValue)
-        {
-            ArcanoMatrixGroups[groupIndex].Rows[rowIndex].Availability[variantIndex] = !cell.Value;
-            await SaveArcanoMatrixStateAsync();
-        }
-    }
-
-    private int CountArcanoMatrixMissing(ArcanoMatrixGroup group)
-    {
-        var count = 0;
-        foreach (var row in group.Rows)
-        {
-            foreach (var status in row.Availability)
-            {
-                if (status == false)
-                {
-                    count++;
-                }
-            }
-        }
-
-        return count;
-    }
-
-    private record BlueprintRow(string Name, string Color, params bool?[] Availability);
-
-    private sealed class ArcanoMatrixGroup
-    {
-        public ArcanoMatrixGroup(string title, ArcanoMatrixRowState[] rows, int activeRows)
-        {
-            Title = title;
-            Rows = rows;
-            ActiveRows = activeRows;
-        }
-
-        public string Title { get; }
-
-        public ArcanoMatrixRowState[] Rows { get; }
-
-        public int ActiveRows { get; }
-    }
-
-    private sealed class ArcanoMatrixRow
-    {
-        public ArcanoMatrixRow(string name, string color)
-        {
-            Name = name;
-            Color = color;
-        }
-
-        public string Name { get; }
-
-        public string Color { get; }
-    }
-
-    private sealed class ArcanoMatrixRowState
-    {
-        public ArcanoMatrixRowState(bool?[] availability)
-        {
-            Availability = availability;
-        }
-
-        public bool?[] Availability { get; }
-    }
+    private sealed record StoredBooleanValues(int Version, Dictionary<string, bool?> Values);
 }

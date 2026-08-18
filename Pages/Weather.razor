@@ -39,6 +39,9 @@ else
 @code {
     private WeatherForecast[]? forecasts;
 
+    /// <summary>
+    /// Carga las previsiones meteorologicas desde el recurso JSON de datos de ejemplo.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
@@ -52,6 +55,9 @@ else
 
         public string? Summary { get; set; }
 
+        /// <summary>
+        /// Obtiene la temperatura equivalente en grados Fahrenheit.
+        /// </summary>
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }
 }

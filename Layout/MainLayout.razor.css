@@ -8,6 +8,7 @@
 
 main {
     flex: 1;
+    min-width: 0;
 }
 
 .sidebar {
@@ -18,7 +19,7 @@ main {
 .top-row {
     background: linear-gradient(180deg, #34373c 0%, #26292d 100%);
     border-bottom: 1px solid #111;
-    justify-content: flex-end;
+    justify-content: flex-start;
     height: 3.5rem;
     display: flex;
     align-items: center;
@@ -57,6 +58,7 @@ main {
 
     .sidebar {
         width: 250px;
+        flex: 0 0 250px;
         height: 100vh;
         position: sticky;
         top: 0;

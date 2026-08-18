@@ -1,0 +1,83 @@
+.tauceti-table {
+    min-width: 1400px;
+}
+
+.tauceti-section-start td {
+    border-top: 2px solid #111;
+}
+
+.remanente-status-cell {
+    min-width: 118px;
+    height: 22px;
+    padding: 0 3px;
+    background: #8f9aa3;
+    border: 1px solid var(--item-border);
+    box-sizing: border-box;
+    white-space: normal;
+}
+
+.remanente-col-header {
+    min-width: 118px;
+}
+
+.remanente-group-header,
+.remanente-first-column {
+    border-left: 2px solid #111 !important;
+}
+
+.remanente-counter,
+.remanente-controls {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    vertical-align: middle;
+}
+
+.remanente-counter {
+    height: 20px;
+    color: #111;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.remanente-stock {
+    color: #ffd54a;
+    text-shadow: 0 1px 1px #111;
+}
+
+.remanente-empty {
+    color: #b91c1c;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.remanente-button,
+.remanente-use-button {
+    min-width: 16px;
+    height: 14px;
+    padding: 0 3px;
+    border: 1px solid rgba(0,0,0,0.55);
+    border-radius: 2px;
+    background: rgba(255,255,255,0.72);
+    color: #111;
+    font-size: 0.65rem;
+    font-weight: 800;
+    line-height: 12px;
+}
+
+.remanente-use-button {
+    min-width: 25px;
+    background: rgba(255, 236, 166, 0.9);
+    font-size: 0.58rem;
+}
+
+.remanente-button:disabled,
+.remanente-use-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.35;
+}
+
+.arcano-matrix-stub-header {
+    width: 160px;
+}
+

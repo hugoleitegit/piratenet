@@ -1,8 +1,18 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject IJSRuntime JS
+@inject LanguageState LanguageState
+@inject NavigationManager Navigation
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Piratenet</a>
+        <a class="piratenet-logo" href="" aria-label="Piratenet - inicio">
+            <span class="piratenet-logo-mark" aria-hidden="true">☠</span>
+            <span class="piratenet-logo-text">PIRATENET</span>
+        </a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
+        </button>
+        <button type="button" class="language-toggle" @onclick="ToggleLanguage" title="Cambiar idioma">
+            @(LanguageState.CurrentLanguage == "es" ? "EN" : "ES")
         </button>
     </div>
 </div>
@@ -11,7 +21,17 @@
     <nav class="nav flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Planos Dorados
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Planos dorados
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="tauceti">
+                <span class="bi bi-stars" aria-hidden="true"></span> Planos Tau Ceti
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="arcanos">
+                <span class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></span> Planos Arcanos
             </NavLink>
         </div>
     </nav>
@@ -22,8 +42,24 @@
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LanguageState.LoadAsync(JS);
+            StateHasChanged();
+        }
+    }
+
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task ToggleLanguage()
+    {
+        var nextLanguage = LanguageState.CurrentLanguage == "es" ? "en" : "es";
+        await LanguageState.SetAsync(JS, nextLanguage);
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
     }
 }
